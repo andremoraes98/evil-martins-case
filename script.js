@@ -5,14 +5,60 @@ const credentialsForm = document.querySelector("form");
 const EMAIL = "EMAIL";
 const PASSWORD = "PASSWORD";
 
-function createDangerAdvisor() {
+let isFormDirty = false;
+
+emailInput.addEventListener("input", ({ target: { value } }) => {
+  validEmail(value);
+});
+
+passwordInput.addEventListener("input", ({ target: { value } }) => {
+  validPassword(value);
+});
+
+function validEmail(value) {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+  const isEmailValid = emailRegex.test(value);
+
+  if (!isFormDirty) return false;
+
+  if (!isEmailValid) {
+    addInputDangerClass(emailInput);
+    return false;
+  }
+
+  removeInputDangerClass(emailInput);
+
+  if (validPassword(passwordInput.value)) removeDangerAdvisor();
+
+  return true;
+}
+
+function validPassword(value) {
+  if (!isFormDirty) return false;
+
+  if (!value) {
+    addInputDangerClass(passwordInput);
+    return false;
+  }
+
+  if (validEmail(emailInput.value)) removeDangerAdvisor();
+
+  removeInputDangerClass(passwordInput);
+
+  return true;
+}
+
+function createDangerAdvisor(
+  advisorText = "Please, complete your credentials"
+) {
   let dangerAdvisor = document.querySelector("p#danger-advisor");
 
   if (dangerAdvisor) return;
 
   dangerAdvisor = document.createElement("p");
   dangerAdvisor.id = "danger-advisor";
-  dangerAdvisor.innerHTML = "Please, complete your credentials";
+  dangerAdvisor.innerHTML = advisorText;
 
   credentialsForm.prepend(dangerAdvisor);
 }
@@ -37,16 +83,21 @@ function checkIfInputIsValid(inputSlug) {
   const inputMapper = {
     [EMAIL]: {
       htmlInput: emailInput,
+      regex: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
     },
     [PASSWORD]: {
       htmlInput: passwordInput,
     },
   };
 
-  const { htmlInput } = inputMapper[inputSlug];
+  isFormDirty = true;
+
+  const { htmlInput, regex = null } = inputMapper[inputSlug];
   const { value: inputValue } = htmlInput;
 
-  if (!inputValue) {
+  const isRegexValid = regex ? regex.test(inputValue) : true;
+
+  if (!inputValue || !isRegexValid) {
     addInputDangerClass(htmlInput);
     return false;
   }
