@@ -26,8 +26,19 @@
   </head>
   <body>
     <form novalidate>
-      <input placeholder="Email" id="email" type="email" />
-      <input placeholder="Password" id="password" type="password" />
+      <input
+        autocomplete="email"
+        id="email"
+        name="email"
+        placeholder="Email"
+        type="email"
+      />
+      <input
+        id="password"
+        name="password"
+        placeholder="Password"
+        type="password"
+      />
 
       <button type="submit">Login</button>
     </form>
