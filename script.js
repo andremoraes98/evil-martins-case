@@ -1,53 +1,32 @@
 const emailInput = document.querySelector("input#email");
 const passwordInput = document.querySelector("input#password");
 const credentialsForm = document.querySelector("form");
+const submitButton = document.querySelector("button");
 
 const EMAIL = "EMAIL";
 const PASSWORD = "PASSWORD";
 
-let isFormDirty = false;
+const formValidation = {
+  isFormDirty: false,
+  isFormValid: false,
+  [EMAIL]: {
+    htmlInput: emailInput,
+    regex: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+    isValid: false,
+  },
+  [PASSWORD]: {
+    htmlInput: passwordInput,
+    isValid: false,
+  },
+};
 
 emailInput.addEventListener("input", ({ target: { value } }) => {
-  validEmail(value);
+  checkIfInputIsValid(EMAIL);
 });
 
 passwordInput.addEventListener("input", ({ target: { value } }) => {
-  validPassword(value);
+  checkIfInputIsValid(PASSWORD);
 });
-
-function validEmail(value) {
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-  const isEmailValid = emailRegex.test(value);
-
-  if (!isFormDirty) return false;
-
-  if (!isEmailValid) {
-    addInputDangerClass(emailInput);
-    return false;
-  }
-
-  removeInputDangerClass(emailInput);
-
-  if (validPassword(passwordInput.value)) removeDangerAdvisor();
-
-  return true;
-}
-
-function validPassword(value) {
-  if (!isFormDirty) return false;
-
-  if (!value) {
-    addInputDangerClass(passwordInput);
-    return false;
-  }
-
-  if (validEmail(emailInput.value)) removeDangerAdvisor();
-
-  removeInputDangerClass(passwordInput);
-
-  return true;
-}
 
 function createDangerAdvisor(
   advisorText = "Please, complete your credentials"
@@ -79,31 +58,33 @@ function removeDangerAdvisor() {
   credentialsForm.removeChild(dangerAdvisor);
 }
 
+function checkFormValidation() {
+  const isFormValid = Object.values(formValidation).every(
+    ({ isValid = true }) => isValid
+  );
+
+  formValidation.isFormValid = isFormValid;
+}
+
 function checkIfInputIsValid(inputSlug) {
-  const inputMapper = {
-    [EMAIL]: {
-      htmlInput: emailInput,
-      regex: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-    },
-    [PASSWORD]: {
-      htmlInput: passwordInput,
-    },
-  };
-
-  isFormDirty = true;
-
-  const { htmlInput, regex = null } = inputMapper[inputSlug];
+  const { htmlInput, regex = null } = formValidation[inputSlug];
   const { value: inputValue } = htmlInput;
 
   const isRegexValid = regex ? regex.test(inputValue) : true;
+  const isInputValid = inputValue && isRegexValid;
+  formValidation[inputSlug].isValid = isInputValid;
+  checkFormValidation();
 
-  if (!inputValue || !isRegexValid) {
+  if (isInputValid) {
+    removeInputDangerClass(htmlInput);
+    if (formValidation.isFormDirty && formValidation.isFormValid)
+      removeDangerAdvisor();
+  } else {
     addInputDangerClass(htmlInput);
-    return false;
+    if (formValidation.isFormDirty) createDangerAdvisor();
   }
 
-  removeInputDangerClass(htmlInput);
-  return true;
+  return isInputValid;
 }
 
 function sendCredentials(credentials) {
@@ -132,6 +113,7 @@ function toggleLoading() {
 
 async function submitCredentials(event) {
   event.preventDefault();
+  formValidation.isFormDirty = true;
 
   const isEmailValid = checkIfInputIsValid(EMAIL);
   const isPasswordValid = checkIfInputIsValid(PASSWORD);
