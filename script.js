@@ -115,6 +115,21 @@ function sendCredentials(credentials) {
   });
 }
 
+function toggleLoading() {
+  const isLoading = submitButton.classList.contains("loading");
+
+  if (isLoading) {
+    submitButton.classList.remove("loading");
+    emailInput.removeAttribute("disabled");
+    passwordInput.removeAttribute("disabled");
+    return;
+  }
+
+  emailInput.setAttribute("disabled", true);
+  passwordInput.setAttribute("disabled", true);
+  submitButton.classList.add("loading");
+}
+
 async function submitCredentials(event) {
   event.preventDefault();
 
@@ -127,14 +142,20 @@ async function submitCredentials(event) {
   }
 
   removeDangerAdvisor();
-  const { status, timeoutId } = await sendCredentials({
-    email: emailInput.value,
-    password: passwordInput.value,
-  });
+  toggleLoading();
 
-  if (status === 204) {
-    clearTimeout(timeoutId);
-    console.log("success");
+  try {
+    const { status, timeoutId } = await sendCredentials({
+      email: emailInput.value,
+      password: passwordInput.value,
+    });
+
+    if (status === 204) {
+      clearTimeout(timeoutId);
+      console.log("success");
+    }
+  } finally {
+    toggleLoading();
   }
 }
 
