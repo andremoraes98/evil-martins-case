@@ -20,24 +20,38 @@ const formValidation = {
   },
 };
 
-emailInput.addEventListener("input", ({ target: { value } }) => {
-  checkIfInputIsValid(EMAIL);
-});
+function sendCredentials(credentials) {
+  return new Promise((resolve) => {
+    const timeoutId = setTimeout(() => {
+      console.log(credentials);
+      resolve({ status: 204, timeoutId });
+    }, 1000);
+  });
+}
 
-passwordInput.addEventListener("input", ({ target: { value } }) => {
-  checkIfInputIsValid(PASSWORD);
-});
+function toggleLoading() {
+  const isLoading = submitButton.classList.contains("loading");
 
-function createDangerAdvisor(
-  advisorText = "Please, complete your credentials"
-) {
+  if (isLoading) {
+    submitButton.classList.remove("loading");
+    emailInput.removeAttribute("disabled");
+    passwordInput.removeAttribute("disabled");
+    return;
+  }
+
+  emailInput.setAttribute("disabled", true);
+  passwordInput.setAttribute("disabled", true);
+  submitButton.classList.add("loading");
+}
+
+function createDangerAdvisor() {
   let dangerAdvisor = document.querySelector("p#danger-advisor");
 
   if (dangerAdvisor) return;
 
   dangerAdvisor = document.createElement("p");
   dangerAdvisor.id = "danger-advisor";
-  dangerAdvisor.innerHTML = advisorText;
+  dangerAdvisor.innerHTML = "Please, complete your credentials";
 
   credentialsForm.prepend(dangerAdvisor);
 }
@@ -46,16 +60,16 @@ function addInputDangerClass(input) {
   input.classList.add("danger");
 }
 
-function removeInputDangerClass(input) {
-  input.classList.remove("danger");
-}
-
 function removeDangerAdvisor() {
   const dangerAdvisor = document.querySelector("p#danger-advisor");
 
   if (!dangerAdvisor) return;
 
   credentialsForm.removeChild(dangerAdvisor);
+}
+
+function removeInputDangerClass(input) {
+  input.classList.remove("danger");
 }
 
 function checkFormValidation() {
@@ -85,30 +99,6 @@ function checkIfInputIsValid(inputSlug) {
   }
 
   return isInputValid;
-}
-
-function sendCredentials(credentials) {
-  return new Promise((resolve) => {
-    const timeoutId = setTimeout(() => {
-      console.log(credentials);
-      resolve({ status: 204, timeoutId });
-    }, 1000);
-  });
-}
-
-function toggleLoading() {
-  const isLoading = submitButton.classList.contains("loading");
-
-  if (isLoading) {
-    submitButton.classList.remove("loading");
-    emailInput.removeAttribute("disabled");
-    passwordInput.removeAttribute("disabled");
-    return;
-  }
-
-  emailInput.setAttribute("disabled", true);
-  passwordInput.setAttribute("disabled", true);
-  submitButton.classList.add("loading");
 }
 
 async function submitCredentials(event) {
@@ -142,3 +132,5 @@ async function submitCredentials(event) {
 }
 
 credentialsForm.addEventListener("submit", submitCredentials);
+emailInput.addEventListener("input", () => checkIfInputIsValid(EMAIL));
+passwordInput.addEventListener("input", () => checkIfInputIsValid(PASSWORD));
