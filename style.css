@@ -24,6 +24,11 @@ input {
   transition: all 0.3s ease;
 }
 
+input:-internal-autofill-selected {
+  box-shadow: 0 0 0px 1000px white inset;
+  -webkit-text-fill-color: #000;
+}
+
 input:hover {
   border: 1px solid #727d00;
 }
