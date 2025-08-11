@@ -88,36 +88,70 @@ function checkFormValidation() {
   formValidation.isFormValid = isFormValid;
 }
 
-function checkIfInputIsValid(inputSlug) {
+function checkInput(inputSlug) {
   const { htmlInput, regex = null } = formValidation[inputSlug];
   const { value: inputValue } = htmlInput;
 
   const isRegexValid = regex ? regex.test(inputValue) : true;
-  const isInputValid = inputValue && isRegexValid;
+  const isInputValid = !!inputValue && isRegexValid;
+
   formValidation[inputSlug].isValid = isInputValid;
-  checkFormValidation();
+
+  return isInputValid;
+}
+
+function toggleFormValidation(isInputValid, inputSlug) {
+  const { ariaErrormessage, htmlInput } = formValidation[inputSlug];
 
   if (isInputValid) {
     removeInputDangerClass(htmlInput);
-    if (formValidation.isFormDirty && formValidation.isFormValid)
-      removeDangerAdvisor();
-  } else {
-    addInputDangerClass(htmlInput);
-    if (formValidation.isFormDirty) createDangerAdvisor();
+    htmlInput.removeAttribute("aria-errormessage");
+    htmlInput.removeAttribute("aria-invalid");
+
+    if (!formValidation.isFormDirty || !formValidation.isFormValid) return;
+
+    removeDangerAdvisor();
+    return;
   }
 
+  addInputDangerClass(htmlInput);
+  htmlInput.setAttribute("aria-errormessage", ariaErrormessage);
+  htmlInput.setAttribute("aria-invalid", true);
+
+  if (!formValidation.isFormDirty) return;
+
+  createDangerAdvisor();
+}
+
+function checkIfInputIsValid(inputSlug) {
+  const isInputValid = checkInput(inputSlug);
+
+  checkFormValidation();
+  toggleFormValidation(isInputValid, inputSlug);
+
   return isInputValid;
+}
+
+function handleInputChange(inputSlug) {
+  const isInputValid = checkInput(inputSlug);
+
+  if (!isInputValid) return;
+
+  checkFormValidation();
+  toggleFormValidation(true, inputSlug);
 }
 
 async function submitCredentials(event) {
   event.preventDefault();
   formValidation.isFormDirty = true;
+  submitButton.disabled = true;
 
   const isEmailValid = checkIfInputIsValid(EMAIL);
   const isPasswordValid = checkIfInputIsValid(PASSWORD);
 
   if (!isEmailValid || !isPasswordValid) {
     createDangerAdvisor();
+    submitButton.disabled = false;
     return;
   }
 
@@ -136,9 +170,12 @@ async function submitCredentials(event) {
     }
   } finally {
     toggleLoading();
+    submitButton.disabled = false;
   }
 }
 
 credentialsForm.addEventListener("submit", submitCredentials);
-emailInput.addEventListener("input", () => checkIfInputIsValid(EMAIL));
-passwordInput.addEventListener("input", () => checkIfInputIsValid(PASSWORD));
+emailInput.addEventListener("change", () => checkIfInputIsValid(EMAIL));
+passwordInput.addEventListener("change", () => checkIfInputIsValid(PASSWORD));
+emailInput.addEventListener("input", () => handleInputChange(EMAIL));
+passwordInput.addEventListener("input", () => handleInputChange(PASSWORD));

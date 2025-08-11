@@ -31,11 +31,15 @@ label {
   flex-direction: column;
 }
 
+label.invalid {
+  color: var(--danger-red);
+}
+
 input {
   border: 1px solid var(--full-black);
   border-radius: 8px;
   font-size: 16px;
-  margin-bottom: 16px;
+  margin: 8px 0 16px;
   min-width: 240px;
   padding: 8px 16px;
   transition: all 0.3s ease;
@@ -64,7 +68,7 @@ input:disabled:hover {
   cursor: not-allowed;
 }
 
-input.danger {
+input.invalid {
   border-color: var(--danger-red);
 }
 
