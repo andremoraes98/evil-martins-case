@@ -26,6 +26,11 @@ form {
   justify-content: center;
 }
 
+label {
+  display: flex;
+  flex-direction: column;
+}
+
 input {
   border: 1px solid var(--full-black);
   border-radius: 8px;

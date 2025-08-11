@@ -10,11 +10,13 @@ const formValidation = {
   isFormDirty: false,
   isFormValid: false,
   [EMAIL]: {
+    ariaErrormessage: "email-error",
     htmlInput: emailInput,
     regex: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
     isValid: false,
   },
   [PASSWORD]: {
+    ariaErrormessage: "password-error",
     htmlInput: passwordInput,
     isValid: false,
   },
@@ -57,7 +59,10 @@ function createDangerAdvisor() {
 }
 
 function addInputDangerClass(input) {
-  input.classList.add("danger");
+  input.classList.add("invalid");
+
+  const label = input.parentElement;
+  label.classList.add("invalid");
 }
 
 function removeDangerAdvisor() {
@@ -69,7 +74,10 @@ function removeDangerAdvisor() {
 }
 
 function removeInputDangerClass(input) {
-  input.classList.remove("danger");
+  input.classList.remove("invalid");
+
+  const label = input.parentElement;
+  label.classList.remove("invalid");
 }
 
 function checkFormValidation() {
